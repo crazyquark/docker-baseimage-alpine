@@ -16,7 +16,6 @@ pipeline {
     GITHUB_TOKEN=credentials('498b4638-2d02-4ce5-832d-8a57d01d97ab')
     GITLAB_TOKEN=credentials('b6f0f1dd-6952-4cf6-95d1-9c06380283f0')
     GITLAB_NAMESPACE=credentials('gitlab-namespace-id')
-    SCARF_TOKEN=credentials('scarf_api_key')
     BUILD_VERSION_ARG = 'OS'
     LS_USER = 'linuxserver'
     LS_REPO = 'docker-baseimage-alpine'
@@ -48,7 +47,7 @@ pipeline {
         script{
           env.EXIT_STATUS = ''
           env.LS_RELEASE = sh(
-            script: '''docker run --rm quay.io/skopeo/stable:v1 inspect docker://ghcr.io/${LS_USER}/${CONTAINER_NAME}:3.18 2>/dev/null | jq -r '.Labels.build_version' | awk '{print $3}' | grep '\\-ls' || : ''',
+            script: '''docker run --rm quay.io/skopeo/stable:v1 inspect docker://ghcr.io/${LS_USER}/${CONTAINER_NAME}:3.19 2>/dev/null | jq -r '.Labels.build_version' | awk '{print $3}' | grep '\\-ls' || : ''',
             returnStdout: true).trim()
           env.LS_RELEASE_NOTES = sh(
             script: '''cat readme-vars.yml | awk -F \\" '/date: "[0-9][0-9].[0-9][0-9].[0-9][0-9]:/ {print $4;exit;}' | sed -E ':a;N;$!ba;s/\\r{0,1}\\n/\\\\n/g' ''',
@@ -72,7 +71,7 @@ pipeline {
         script{
           env.LS_TAG_NUMBER = sh(
             script: '''#! /bin/bash
-                       tagsha=$(git rev-list -n 1 3.18-${LS_RELEASE} 2>/dev/null)
+                       tagsha=$(git rev-list -n 1 3.19-${LS_RELEASE} 2>/dev/null)
                        if [ "${tagsha}" == "${COMMIT_SHA}" ]; then
                          echo ${LS_RELEASE_NUMBER}
                        elif [ -z "${GIT_COMMIT}" ]; then
@@ -161,13 +160,13 @@ pipeline {
           env.GITLABIMAGE = 'registry.gitlab.com/linuxserver.io/' + env.LS_REPO + '/' + env.CONTAINER_NAME
           env.QUAYIMAGE = 'quay.io/linuxserver.io/' + env.CONTAINER_NAME
           if (env.MULTIARCH == 'true') {
-            env.CI_TAGS = 'amd64-3.18-' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER + '|arm64v8-3.18-' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER
+            env.CI_TAGS = 'amd64-3.19-' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER + '|arm64v8-3.19-' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER
           } else {
-            env.CI_TAGS = '3.18-' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER
+            env.CI_TAGS = '3.19-' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER
           }
           env.VERSION_TAG = env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER
-          env.META_TAG = '3.18-' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER
-          env.EXT_RELEASE_TAG = '3.18-version-' + env.EXT_RELEASE_CLEAN
+          env.META_TAG = '3.19-' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER
+          env.EXT_RELEASE_TAG = '3.19-version-' + env.EXT_RELEASE_CLEAN
         }
       }
     }
@@ -184,13 +183,13 @@ pipeline {
           env.GITLABIMAGE = 'registry.gitlab.com/linuxserver.io/' + env.LS_REPO + '/lsiodev-' + env.CONTAINER_NAME
           env.QUAYIMAGE = 'quay.io/linuxserver.io/lsiodev-' + env.CONTAINER_NAME
           if (env.MULTIARCH == 'true') {
-            env.CI_TAGS = 'amd64-3.18-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '|arm64v8-3.18-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA
+            env.CI_TAGS = 'amd64-3.19-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '|arm64v8-3.19-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA
           } else {
-            env.CI_TAGS = '3.18-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA
+            env.CI_TAGS = '3.19-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA
           }
           env.VERSION_TAG = env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA
-          env.META_TAG = '3.18-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA
-          env.EXT_RELEASE_TAG = '3.18-version-' + env.EXT_RELEASE_CLEAN
+          env.META_TAG = '3.19-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA
+          env.EXT_RELEASE_TAG = '3.19-version-' + env.EXT_RELEASE_CLEAN
           env.DOCKERHUB_LINK = 'https://hub.docker.com/r/' + env.DEV_DOCKERHUB_IMAGE + '/tags/'
         }
       }
@@ -207,13 +206,13 @@ pipeline {
           env.GITLABIMAGE = 'registry.gitlab.com/linuxserver.io/' + env.LS_REPO + '/lspipepr-' + env.CONTAINER_NAME
           env.QUAYIMAGE = 'quay.io/linuxserver.io/lspipepr-' + env.CONTAINER_NAME
           if (env.MULTIARCH == 'true') {
-            env.CI_TAGS = 'amd64-3.18-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '-pr-' + env.PULL_REQUEST + '|arm64v8-3.18-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '-pr-' + env.PULL_REQUEST
+            env.CI_TAGS = 'amd64-3.19-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '-pr-' + env.PULL_REQUEST + '|arm64v8-3.19-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '-pr-' + env.PULL_REQUEST
           } else {
-            env.CI_TAGS = '3.18-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '-pr-' + env.PULL_REQUEST
+            env.CI_TAGS = '3.19-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '-pr-' + env.PULL_REQUEST
           }
           env.VERSION_TAG = env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '-pr-' + env.PULL_REQUEST
-          env.META_TAG = '3.18-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '-pr-' + env.PULL_REQUEST
-          env.EXT_RELEASE_TAG = '3.18-version-' + env.EXT_RELEASE_CLEAN
+          env.META_TAG = '3.19-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '-pr-' + env.PULL_REQUEST
+          env.EXT_RELEASE_TAG = '3.19-version-' + env.EXT_RELEASE_CLEAN
           env.CODE_URL = 'https://github.com/' + env.LS_USER + '/' + env.LS_REPO + '/pull/' + env.PULL_REQUEST
           env.DOCKERHUB_LINK = 'https://hub.docker.com/r/' + env.PR_DOCKERHUB_IMAGE + '/tags/'
         }
@@ -327,12 +326,12 @@ pipeline {
               else
                 echo "false" > /tmp/${COMMIT_SHA}-${BUILD_NUMBER}
               fi
-              mkdir -p ${TEMPDIR}/gitbook
-              git clone https://github.com/linuxserver/docker-documentation.git ${TEMPDIR}/gitbook/docker-documentation
-              if [[ ("${BRANCH_NAME}" == "master") || ("${BRANCH_NAME}" == "main") ]] && [[ (! -f ${TEMPDIR}/gitbook/docker-documentation/images/docker-${CONTAINER_NAME}.md) || ("$(md5sum ${TEMPDIR}/gitbook/docker-documentation/images/docker-${CONTAINER_NAME}.md | awk '{ print $1 }')" != "$(md5sum ${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/docker-${CONTAINER_NAME}.md | awk '{ print $1 }')") ]]; then
-                cp ${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/docker-${CONTAINER_NAME}.md ${TEMPDIR}/gitbook/docker-documentation/images/
-                cd ${TEMPDIR}/gitbook/docker-documentation/
-                git add images/docker-${CONTAINER_NAME}.md
+              mkdir -p ${TEMPDIR}/docs
+              git clone https://github.com/linuxserver/docker-documentation.git ${TEMPDIR}/docs/docker-documentation
+              if [[ ("${BRANCH_NAME}" == "master") || ("${BRANCH_NAME}" == "main") ]] && [[ (! -f ${TEMPDIR}/docs/docker-documentation/docs/images/docker-${CONTAINER_NAME}.md) || ("$(md5sum ${TEMPDIR}/docs/docker-documentation/docs/images/docker-${CONTAINER_NAME}.md | awk '{ print $1 }')" != "$(md5sum ${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/docker-${CONTAINER_NAME}.md | awk '{ print $1 }')") ]]; then
+                cp ${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/docker-${CONTAINER_NAME}.md ${TEMPDIR}/docs/docker-documentation/docs/images/
+                cd ${TEMPDIR}/docs/docker-documentation
+                git add docs/images/docker-${CONTAINER_NAME}.md
                 git commit -m 'Bot Updating Documentation'
                 git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/linuxserver/docker-documentation.git --all
               fi
@@ -398,35 +397,6 @@ pipeline {
              "merge_requests_access_level":"disabled",\
              "repository_access_level":"enabled",\
              "visibility":"public"}' '''
-      } 
-    }
-    /* #######################
-           Scarf.sh package registry
-       ####################### */
-    // Add package to Scarf.sh and set permissions
-    stage("Scarf.sh package registry"){
-      when {
-        branch "master"
-        environment name: 'EXIT_STATUS', value: ''
-      }
-      steps{
-        sh '''#! /bin/bash
-              PACKAGE_UUID=$(curl -X GET -H "Authorization: Bearer ${SCARF_TOKEN}" https://scarf.sh/api/v1/organizations/linuxserver-ci/packages | jq -r '.[] | select(.name=="linuxserver/baseimage-alpine") | .uuid' || :)
-              if [ -z "${PACKAGE_UUID}" ]; then
-                echo "Adding package to Scarf.sh"
-                curl -sX POST https://scarf.sh/api/v1/organizations/linuxserver-ci/packages \
-                  -H "Authorization: Bearer ${SCARF_TOKEN}" \
-                  -H "Content-Type: application/json" \
-                  -d '{"name":"linuxserver/baseimage-alpine",\
-                       "shortDescription":"example description",\
-                       "libraryType":"docker",\
-                       "website":"https://github.com/linuxserver/docker-baseimage-alpine",\
-                       "backendUrl":"https://ghcr.io/linuxserver/baseimage-alpine",\
-                       "publicUrl":"https://lscr.io/linuxserver/baseimage-alpine"}' || :
-              else
-                echo "Package already exists on Scarf.sh"
-              fi
-           '''
       } 
     }
     /* ###############
@@ -685,12 +655,12 @@ pipeline {
                   echo $QUAYPASS | docker login quay.io -u $QUAYUSER --password-stdin
                   for PUSHIMAGE in "${GITHUBIMAGE}" "${GITLABIMAGE}" "${QUAYIMAGE}" "${IMAGE}"; do
                     docker tag ${IMAGE}:${META_TAG} ${PUSHIMAGE}:${META_TAG}
-                    docker tag ${PUSHIMAGE}:${META_TAG} ${PUSHIMAGE}:3.18
+                    docker tag ${PUSHIMAGE}:${META_TAG} ${PUSHIMAGE}:3.19
                     docker tag ${PUSHIMAGE}:${META_TAG} ${PUSHIMAGE}:${EXT_RELEASE_TAG}
                     if [ -n "${SEMVER}" ]; then
                       docker tag ${PUSHIMAGE}:${META_TAG} ${PUSHIMAGE}:${SEMVER}
                     fi
-                    docker push ${PUSHIMAGE}:3.18
+                    docker push ${PUSHIMAGE}:3.19
                     docker push ${PUSHIMAGE}:${META_TAG}
                     docker push ${PUSHIMAGE}:${EXT_RELEASE_TAG}
                     if [ -n "${SEMVER}" ]; then
@@ -736,10 +706,10 @@ pipeline {
                   fi
                   for MANIFESTIMAGE in "${IMAGE}" "${GITLABIMAGE}" "${GITHUBIMAGE}" "${QUAYIMAGE}"; do
                     docker tag ${IMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-${META_TAG}
-                    docker tag ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-3.18
+                    docker tag ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-3.19
                     docker tag ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG}
                     docker tag ${IMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${META_TAG}
-                    docker tag ${MANIFESTIMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-3.18
+                    docker tag ${MANIFESTIMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-3.19
                     docker tag ${MANIFESTIMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG}
                     if [ -n "${SEMVER}" ]; then
                       docker tag ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-${SEMVER}
@@ -747,17 +717,17 @@ pipeline {
                     fi
                     docker push ${MANIFESTIMAGE}:amd64-${META_TAG}
                     docker push ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG}
-                    docker push ${MANIFESTIMAGE}:amd64-3.18
+                    docker push ${MANIFESTIMAGE}:amd64-3.19
                     docker push ${MANIFESTIMAGE}:arm64v8-${META_TAG}
-                    docker push ${MANIFESTIMAGE}:arm64v8-3.18
+                    docker push ${MANIFESTIMAGE}:arm64v8-3.19
                     docker push ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG}
                     if [ -n "${SEMVER}" ]; then
                       docker push ${MANIFESTIMAGE}:amd64-${SEMVER}
                       docker push ${MANIFESTIMAGE}:arm64v8-${SEMVER}
                     fi
-                    docker manifest push --purge ${MANIFESTIMAGE}:3.18 || :
-                    docker manifest create ${MANIFESTIMAGE}:3.18 ${MANIFESTIMAGE}:amd64-3.18 ${MANIFESTIMAGE}:arm64v8-3.18
-                    docker manifest annotate ${MANIFESTIMAGE}:3.18 ${MANIFESTIMAGE}:arm64v8-3.18 --os linux --arch arm64 --variant v8
+                    docker manifest push --purge ${MANIFESTIMAGE}:3.19 || :
+                    docker manifest create ${MANIFESTIMAGE}:3.19 ${MANIFESTIMAGE}:amd64-3.19 ${MANIFESTIMAGE}:arm64v8-3.19
+                    docker manifest annotate ${MANIFESTIMAGE}:3.19 ${MANIFESTIMAGE}:arm64v8-3.19 --os linux --arch arm64 --variant v8
                     docker manifest push --purge ${MANIFESTIMAGE}:${META_TAG} || :
                     docker manifest create ${MANIFESTIMAGE}:${META_TAG} ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${META_TAG}
                     docker manifest annotate ${MANIFESTIMAGE}:${META_TAG} ${MANIFESTIMAGE}:arm64v8-${META_TAG} --os linux --arch arm64 --variant v8
@@ -773,13 +743,13 @@ pipeline {
                     digest=$(curl -s \
                       --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
                       --header "Authorization: Bearer ${token}" \
-                      "https://ghcr.io/v2/linuxserver/${CONTAINER_NAME}/manifests/arm32v7-3.18")
+                      "https://ghcr.io/v2/linuxserver/${CONTAINER_NAME}/manifests/arm32v7-3.19")
                     if [[ $(echo "$digest" | jq -r '.layers') != "null" ]]; then
-                      docker manifest push --purge ${MANIFESTIMAGE}:arm32v7-3.18 || :
-                      docker manifest create ${MANIFESTIMAGE}:arm32v7-3.18 ${MANIFESTIMAGE}:amd64-3.18
-                      docker manifest push --purge ${MANIFESTIMAGE}:arm32v7-3.18
+                      docker manifest push --purge ${MANIFESTIMAGE}:arm32v7-3.19 || :
+                      docker manifest create ${MANIFESTIMAGE}:arm32v7-3.19 ${MANIFESTIMAGE}:amd64-3.19
+                      docker manifest push --purge ${MANIFESTIMAGE}:arm32v7-3.19
                     fi
-                    docker manifest push --purge ${MANIFESTIMAGE}:3.18
+                    docker manifest push --purge ${MANIFESTIMAGE}:3.19
                     docker manifest push --purge ${MANIFESTIMAGE}:${META_TAG} 
                     docker manifest push --purge ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} 
                     if [ -n "${SEMVER}" ]; then
@@ -819,6 +789,41 @@ pipeline {
               printf '","draft": false,"prerelease": false}' >> releasebody.json
               paste -d'\\0' start releasebody.json > releasebody.json.done
               curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/releases -d @releasebody.json.done'''
+      }
+    }
+    // Add protection to the release branch
+    stage('Github-Release-Branch-Protection') {
+      when {
+        branch "master"
+        environment name: 'CHANGE_ID', value: ''
+        environment name: 'EXIT_STATUS', value: ''
+      }
+      steps {
+        echo "Setting up protection for release branch master"
+        sh '''#! /bin/bash
+          curl -H "Authorization: token ${GITHUB_TOKEN}" -X PUT https://api.github.com/repos/${LS_USER}/${LS_REPO}/branches/master/protection \
+          -d $(jq -c .  << EOF
+            {
+              "required_status_checks": null,
+              "enforce_admins": false,
+              "required_pull_request_reviews": {
+                "dismiss_stale_reviews": false,
+                "require_code_owner_reviews": false,
+                "require_last_push_approval": false,
+                "required_approving_review_count": 1
+              },
+              "restrictions": null,
+              "required_linear_history": false,
+              "allow_force_pushes": false,
+              "allow_deletions": false,
+              "block_creations": false,
+              "required_conversation_resolution": true,
+              "lock_branch": false,
+              "allow_fork_syncing": false,
+              "required_signatures": false
+            }
+EOF
+          ) '''
       }
     }
     // Use helper container to sync the current README on master to the dockerhub endpoint
